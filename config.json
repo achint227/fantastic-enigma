@@ -1,7 +1,7 @@
 {
-    "dbName": "Master",
+    "dbName": "AdventureWorks",
     "dbConfig": {
-        "server": "localhost",
+        "server": "sqlservercentralpublic.database.windows.net",
         "options": {
             "port": 1433,
             "trustServerCertificate": true
@@ -9,8 +9,8 @@
         "authentication": {
             "type": "default",
             "options": {
-                "userName": "sa",
-                "password": "yourStrong(!)Password"
+                "userName": "sqlfamily",
+                "password": "sqlf@m1ly"
             }
         }
     }
