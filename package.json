@@ -9,6 +9,8 @@
   "author": "Achint Bhat",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^4.4.0",
     "prisma": "^4.4.0"
-  }
+  },
+  "type": "module"
 }
