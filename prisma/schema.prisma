@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = "sqlserver://sqlservercentralpublic.database.windows.net:1433;database=AdventureWorks;schema=SalesLT;user=sqlfamily;password=sqlf@m1ly;encrypt=true"
+}
+
+model Address {
+  AddressID                                                  Int                @id(map: "PK_Address_AddressID") @default(autoincrement())
+  AddressLine1                                               String             @db.NVarChar(60)
+  AddressLine2                                               String?            @db.NVarChar(60)
+  City                                                       String             @db.NVarChar(30)
+  PostalCode                                                 String             @db.NVarChar(15)
+  rowguid                                                    String             @unique(map: "AK_Address_rowguid") @db.UniqueIdentifier
+  ModifiedDate                                               DateTime           @db.DateTime
+  CustomerAddress                                            CustomerAddress[]
+  SalesOrderHeader_AddressToSalesOrderHeader_BillToAddressID SalesOrderHeader[] @relation("AddressToSalesOrderHeader_BillToAddressID")
+  SalesOrderHeader_AddressToSalesOrderHeader_ShipToAddressID SalesOrderHeader[] @relation("AddressToSalesOrderHeader_ShipToAddressID")
+
+  @@index([AddressLine1, AddressLine2, City, PostalCode], map: "IX_Address_AddressLine1_AddressLine2_City_StateProvince_PostalCode_CountryRegion")
+}
+
+model Customer {
+  CustomerID       Int                @id(map: "PK_Customer_CustomerID") @default(autoincrement())
+  Title            String?            @db.NVarChar(8)
+  Suffix           String?            @db.NVarChar(10)
+  CompanyName      String?            @db.NVarChar(128)
+  SalesPerson      String?            @db.NVarChar(256)
+  EmailAddress     String?            @db.NVarChar(50)
+  PasswordHash     String             @db.VarChar(128)
+  PasswordSalt     String             @db.VarChar(10)
+  rowguid          String             @unique(map: "AK_Customer_rowguid") @db.UniqueIdentifier
+  ModifiedDate     DateTime           @db.DateTime
+  CustomerAddress  CustomerAddress[]
+  SalesOrderHeader SalesOrderHeader[]
+
+  @@index([EmailAddress], map: "IX_Customer_EmailAddress")
+}
+
+model CustomerAddress {
+  CustomerID   Int
+  AddressID    Int
+  rowguid      String   @unique(map: "AK_CustomerAddress_rowguid") @db.UniqueIdentifier
+  ModifiedDate DateTime @db.DateTime
+  Address      Address  @relation(fields: [AddressID], references: [AddressID], onUpdate: NoAction, map: "FK_CustomerAddress_Address_AddressID")
+  Customer     Customer @relation(fields: [CustomerID], references: [CustomerID], onUpdate: NoAction, map: "FK_CustomerAddress_Customer_CustomerID")
+
+  @@id([CustomerID, AddressID], map: "PK_CustomerAddress_CustomerID_AddressID")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model Logger {
+  LogDate    DateTime? @db.DateTime
+  LogMessage String?   @db.VarChar(200)
+  UserName   String?   @db.VarChar(50)
+
+  @@ignore
+}
+
+model Product {
+  ProductID              Int                @id(map: "PK_Product_ProductID") @default(autoincrement())
+  ProductNumber          String             @unique(map: "AK_Product_ProductNumber") @db.NVarChar(25)
+  Color                  String?            @db.NVarChar(15)
+  StandardCost           Float              @db.Money
+  ListPrice              Float              @db.Money
+  Size                   String?            @db.NVarChar(5)
+  Weight                 Decimal?           @db.Decimal(8, 2)
+  ProductCategoryID      Int?
+  ProductModelID         Int?
+  SellStartDate          DateTime           @db.DateTime
+  SellEndDate            DateTime?          @db.DateTime
+  DiscontinuedDate       DateTime?          @db.DateTime
+  ThumbNailPhoto         Bytes?
+  ThumbnailPhotoFileName String?            @db.NVarChar(50)
+  rowguid                String             @unique(map: "AK_Product_rowguid") @db.UniqueIdentifier
+  ModifiedDate           DateTime           @db.DateTime
+  ProductCategory        ProductCategory?   @relation(fields: [ProductCategoryID], references: [ProductCategoryID], onDelete: NoAction, onUpdate: NoAction, map: "FK_Product_ProductCategory_ProductCategoryID")
+  ProductModel           ProductModel?      @relation(fields: [ProductModelID], references: [ProductModelID], onDelete: NoAction, onUpdate: NoAction, map: "FK_Product_ProductModel_ProductModelID")
+  SalesOrderDetail       SalesOrderDetail[]
+}
+
+model ProductCategory {
+  ProductCategoryID       Int               @id(map: "PK_ProductCategory_ProductCategoryID") @default(autoincrement())
+  ParentProductCategoryID Int?
+  rowguid                 String            @unique(map: "AK_ProductCategory_rowguid") @db.UniqueIdentifier
+  ModifiedDate            DateTime          @db.DateTime
+  ProductCategory         ProductCategory?  @relation("ProductCategoryToProductCategory", fields: [ParentProductCategoryID], references: [ProductCategoryID], onDelete: NoAction, onUpdate: NoAction, map: "FK_ProductCategory_ProductCategory_ParentProductCategoryID_ProductCategoryID")
+  Product                 Product[]
+  other_ProductCategory   ProductCategory[] @relation("ProductCategoryToProductCategory")
+}
+
+model ProductDescription {
+  ProductDescriptionID           Int                              @id(map: "PK_ProductDescription_ProductDescriptionID") @default(autoincrement())
+  Description                    String                           @db.NVarChar(400)
+  rowguid                        String                           @unique(map: "AK_ProductDescription_rowguid") @db.UniqueIdentifier
+  ModifiedDate                   DateTime                         @db.DateTime
+  ProductModelProductDescription ProductModelProductDescription[]
+}
+
+model ProductModel {
+  ProductModelID                 Int                              @id(map: "PK_ProductModel_ProductModelID") @default(autoincrement())
+  CatalogDescription             String?                          @db.Xml
+  rowguid                        String                           @unique(map: "AK_ProductModel_rowguid") @db.UniqueIdentifier
+  ModifiedDate                   DateTime                         @db.DateTime
+  Product                        Product[]
+  ProductModelProductDescription ProductModelProductDescription[]
+}
+
+model ProductModelProductDescription {
+  ProductModelID       Int
+  ProductDescriptionID Int
+  Culture              String             @db.NChar(6)
+  rowguid              String             @unique(map: "AK_ProductModelProductDescription_rowguid") @db.UniqueIdentifier
+  ModifiedDate         DateTime           @db.DateTime
+  ProductDescription   ProductDescription @relation(fields: [ProductDescriptionID], references: [ProductDescriptionID], onUpdate: NoAction, map: "FK_ProductModelProductDescription_ProductDescription_ProductDescriptionID")
+  ProductModel         ProductModel       @relation(fields: [ProductModelID], references: [ProductModelID], onUpdate: NoAction, map: "FK_ProductModelProductDescription_ProductModel_ProductModelID")
+
+  @@id([ProductModelID, ProductDescriptionID, Culture], map: "PK_ProductModelProductDescription_ProductModelID_ProductDescriptionID_Culture")
+}
+
+model SalesOrderDetail {
+  SalesOrderID       Int
+  SalesOrderDetailID Int              @default(autoincrement())
+  OrderQty           Int              @db.SmallInt
+  ProductID          Int
+  UnitPrice          Float            @db.Money
+  UnitPriceDiscount  Float            @db.Money
+  LineTotal          Decimal          @db.Decimal(38, 6)
+  rowguid            String           @unique(map: "AK_SalesOrderDetail_rowguid") @db.UniqueIdentifier
+  ModifiedDate       DateTime         @db.DateTime
+  Product            Product          @relation(fields: [ProductID], references: [ProductID], onUpdate: NoAction, map: "FK_SalesOrderDetail_Product_ProductID")
+  SalesOrderHeader   SalesOrderHeader @relation(fields: [SalesOrderID], references: [SalesOrderID], onDelete: Cascade, onUpdate: NoAction, map: "FK_SalesOrderDetail_SalesOrderHeader_SalesOrderID")
+
+  @@id([SalesOrderID, SalesOrderDetailID], map: "PK_SalesOrderDetail_SalesOrderID_SalesOrderDetailID")
+  @@index([ProductID], map: "IX_SalesOrderDetail_ProductID")
+}
+
+model SalesOrderHeader {
+  SalesOrderID                                      Int                @id(map: "PK_SalesOrderHeader_SalesOrderID")
+  RevisionNumber                                    Int                @db.TinyInt
+  OrderDate                                         DateTime           @db.DateTime
+  DueDate                                           DateTime           @db.DateTime
+  ShipDate                                          DateTime?          @db.DateTime
+  Status                                            Int                @db.TinyInt
+  SalesOrderNumber                                  String             @unique(map: "AK_SalesOrderHeader_SalesOrderNumber") @db.NVarChar(25)
+  CustomerID                                        Int
+  ShipToAddressID                                   Int?
+  BillToAddressID                                   Int?
+  ShipMethod                                        String             @db.NVarChar(50)
+  CreditCardApprovalCode                            String?            @db.VarChar(15)
+  SubTotal                                          Float              @db.Money
+  TaxAmt                                            Float              @db.Money
+  Freight                                           Float              @db.Money
+  TotalDue                                          Float              @db.Money
+  Comment                                           String?            @db.NVarChar(Max)
+  rowguid                                           String             @unique(map: "AK_SalesOrderHeader_rowguid") @db.UniqueIdentifier
+  ModifiedDate                                      DateTime           @db.DateTime
+  Address_AddressToSalesOrderHeader_BillToAddressID Address?           @relation("AddressToSalesOrderHeader_BillToAddressID", fields: [BillToAddressID], references: [AddressID], onDelete: NoAction, onUpdate: NoAction, map: "FK_SalesOrderHeader_Address_BillTo_AddressID")
+  Address_AddressToSalesOrderHeader_ShipToAddressID Address?           @relation("AddressToSalesOrderHeader_ShipToAddressID", fields: [ShipToAddressID], references: [AddressID], onDelete: NoAction, onUpdate: NoAction, map: "FK_SalesOrderHeader_Address_ShipTo_AddressID")
+  Customer                                          Customer           @relation(fields: [CustomerID], references: [CustomerID], onUpdate: NoAction, map: "FK_SalesOrderHeader_Customer_CustomerID")
+  SalesOrderDetail                                  SalesOrderDetail[]
+
+  @@index([CustomerID], map: "IX_SalesOrderHeader_CustomerID")
+}

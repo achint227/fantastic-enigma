@@ -9,7 +9,6 @@
   "author": "Achint Bhat",
   "license": "ISC",
   "dependencies": {
-    "sequelize": "^6.23.2",
-    "tedious": "^15.1.0"
+    "prisma": "^4.4.0"
   }
 }
