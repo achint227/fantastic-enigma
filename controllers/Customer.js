@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 
 async function getAllCustomers(req, res) {
-    const { skip, take } = req.params
+    var { skip, take } = req.params
     skip = skip ? skip : 0
     take = take ? take : 10
     const customers = await prisma.Customer.findMany({
