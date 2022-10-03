@@ -8,8 +8,8 @@ const prisma = new PrismaClient()
 
 async function getAllProducts(req, res) {
     var { skip, take } = req.params
-    skip = skip ? skip : 0
-    take = take ? take : 10
+    skip = skip ? parseInt(skip) : 0
+    take = take ? parseInt(take) : 10
     const products = await prisma.Product.findMany({
         skip: skip,
         take: take
@@ -23,7 +23,7 @@ async function getProductById(req, res) {
 
     const product = await prisma.Product.findUnique({
         where: {
-            ProductID: id,
+            ProductID: parseInt(id),
         },
     })
     res.json(product)

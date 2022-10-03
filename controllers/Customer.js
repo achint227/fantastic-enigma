@@ -6,8 +6,8 @@ const prisma = new PrismaClient()
 
 async function getAllCustomers(req, res) {
     var { skip, take } = req.params
-    skip = skip ? skip : 0
-    take = take ? take : 10
+    skip = skip ? parseInt(skip) : 0
+    take = take ? parseInt(take) : 10
     const customers = await prisma.Customer.findMany({
         skip: skip,
         take: take
@@ -21,7 +21,7 @@ async function getCustomerById(req, res) {
 
     const customer = await prisma.Customer.findUnique({
         where: {
-            CustomerID: id,
+            CustomerID: parseInt(id),
         },
     })
     res.json(customer)
