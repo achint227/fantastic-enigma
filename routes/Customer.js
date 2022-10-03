@@ -7,7 +7,7 @@ router
     .post(customerController.notImplemented);
 router
     .route('/:id')
-    .get(customerController.getCustomerByID)
+    .get(customerController.getCustomerById)
     .patch(customerController.notImplemented)
     .delete(customerController.notImplemented);
 module.exports = router;

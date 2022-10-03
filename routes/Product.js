@@ -7,7 +7,7 @@ router
     .post(productsController.notImplemented);
 router
     .route('/:id')
-    .get(productsController.getProductByID)
+    .get(productsController.getProductById)
     .patch(productsController.notImplemented)
     .delete(productsController.notImplemented);
 module.exports = router;
