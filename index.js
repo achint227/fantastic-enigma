@@ -1,11 +1,6 @@
-import { PrismaClient } from '@prisma/client'
+const app = require('./app');
+const port = 3000;
+app.listen(port, () => {
+console.log(`App running on port ${port}...`);
+});
 
-const prisma = new PrismaClient()
-// use `prisma` in your application to read and write data in your DB
-
-const customers = await prisma.Customer.findMany({
-  skip:0,
-  take:5
-})
-
-console.log(customers)
