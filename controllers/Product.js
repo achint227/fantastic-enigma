@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+const { PrismaClient } = require('@prisma/client')
+
 
 const prisma = new PrismaClient()
 
@@ -9,23 +10,23 @@ async function getAllProducts(req, res) {
     const { skip, take } = req.params
     skip = skip ? skip : 0
     take = take ? take : 10
-    const res = await prisma.Product.findMany({
+    const products = await prisma.Product.findMany({
         skip: skip,
         take: take
     })
-    res.json(res)
+    res.json(products)
 
 }
 
 async function getProductById(req, res) {
     const { id } = req.params
 
-    const res = await prisma.Product.findUnique({
+    const product = await prisma.Product.findUnique({
         where: {
             ProductID: id,
         },
     })
-    res.json(res)
+    res.json(product)
 }
 
 async function notImplemented(_, res) {
